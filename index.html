@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComplyStream AI × Google Cloud | FinCrime Wasteland</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 废土风基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0a0a0a;
+            color: #b8b8b8;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(28, 58, 0, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(88, 28, 0, 0.15) 0%, transparent 20%);
+            min-height: 100vh;
+        }
+        
+        /* 扫描线效果 */
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.2), transparent);
+            z-index: 1000;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { top: 100%; opacity: 0.8; }
+        }
+        
+        /* 静态噪点覆盖 */
+        .static-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* 辐射标志 */
+        .radiation-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #3a9c1a;
+            opacity: 0.4;
+            animation: pulse 3s infinite;
+            z-index: 2;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* 导航栏 */
+        .wasteland-nav {
+            background-color: rgba(18, 18, 18, 0.85);
+            border-bottom: 1px solid #3a9c1a;
+            padding: 15px 5%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: #3a9c1a;
+            text-shadow: 0 0 10px rgba(58, 156, 26, 0.7);
+        }
+        
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            animation: glitch-1 2s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: 2px 0 #00ffff;
+            animation: glitch-2 3s infinite linear alternate-reverse;
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+        }
+        
+        @keyframes glitch-1 {
+            0% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); }
+            100% { clip-path: polygon(0 15%, 100% 15%, 100% 50%, 0 50%); }
+        }
+        
+        @keyframes glitch-2 {
+            0% { clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); }
+            100% { clip-path: polygon(0 80%, 100% 80%, 100% 100%, 0 100%); }
+        }
+        
+        .sub-logo {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-link {
+            color: #b8b8b8;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+        }
+        
+        .nav-link:hover {
+            color: #3a9c1a;
+            border: 1px solid #3a9c1a;
+            text-shadow: 0 0 5px rgba(58, 156, 26, 0.5);
+        }
+        
+        .nav-link i {
+            margin-right: 8px;
+        }
+        
+        /* 英雄区域 */
+        .hero {
+            padding: 80px 5% 40px;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #3a9c1a;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(58, 156, 26, 0.5);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #ccc;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            border-left: 3px solid #3a9c1a;
+            padding-left: 20px;
+            text-align: left;
+        }
+        
+        .hero-subtitle span {
+            color: #3a9c1a;
+            font-weight: 700;
+        }
+        
+        /* 解决方案区域 */
+        .solution-section {
+            padding: 60px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            color: #3a9c1a;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #3a9c1a, transparent);
+        }
+        
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .solution-card {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid #333;
+            padding: 30px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .solution-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #3a9c1a, transparent);
+            transition: left 0.5s;
+        }
+        
+        .solution-card:hover::before {
+            left: 100%;
+        }
+        
+        .solution-card:hover {
+            border-color: #3a9c1a;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            color: #3a9c1a;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        
+        .card-desc {
+            color: #aaa;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+        
+        /* Google Cloud 集成区域 */
+        .integration-section {
+            padding: 80px 5%;
+            background: rgba(20, 20, 20, 0.8);
+            margin-top: 60px;
+            position: relative;
+        }
+        
+        .integration-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233a9c1a' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            z-index: -1;
+        }
+        
+        .google-cloud-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .google-cloud-logo i {
+            font-size: 4rem;
+            color: #4285F4;
+            margin-right: 20px;
+        }
+        
+        .google-cloud-logo span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+        
+        .integration-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .integration-point {
+            background: rgba(40, 40, 40, 0.7);
+            padding: 25px;
+            border-left: 3px solid #4285F4;
+            position: relative;
+        }
+        
+        .integration-point h4 {
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .integration-point p {
+            color: #bbb;
+            font-size: 0.95rem;
+        }
+        
+        /* 号召行动区域 */
+        .cta-section {
+            padding: 80px 5%;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .cta-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #3a9c1a;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(58, 156, 26, 0.5);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: rgba(58, 156, 26, 0.2);
+            color: #3a9c1a;
+            border: 2px solid #3a9c1a;
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            text-decoration: none;
+            margin: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(58, 156, 26, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .cta-button:hover {
+            background: rgba(58, 156, 26, 0.4);
+            box-shadow: 0 0 20px rgba(58, 156, 26, 0.5);
+            transform: scale(1.05);
+        }
+        
+        /* 页脚 */
+        .wasteland-footer {
+            background-color: rgba(10, 10, 10, 0.9);
+            border-top: 1px solid #333;
+            padding: 40px 5% 20px;
+            margin-top: 60px;
+            position: relative;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #3a9c1a;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .footer-link {
+            color: #888;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-link:hover {
+            color: #3a9c1a;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+                position: absolute;
+                top: 70px;
+                right: 5%;
+                background: rgba(18, 18, 18, 0.95);
+                padding: 20px;
+                border: 1px solid #3a9c1a;
+                display: none;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .menu-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: #3a9c1a;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+        
+        /* 菜单切换按钮 */
+        .menu-toggle {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 视觉效果 -->
+    <div class="scan-line"></div>
+    <div class="static-overlay"></div>
+    <div class="radiation-icon">☢</div>
+    
+    <!-- 导航栏 -->
+    <nav class="wasteland-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="glitch" data-text="COMPLYSTREAM">COMPLYSTREAM</span>
+                <span class="sub-logo">/GOOGLE CLOUD INTEGRATION</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-links" id="navLinks">
+                <a href="#solution" class="nav-link"><i class="fas fa-cogs"></i> SOLUTION</a>
+                <a href="#integration" class="nav-link"><i class="fab fa-google"></i> GOOGLE CLOUD</a>
+                <a href="#benefits" class="nav-link"><i class="fas fa-bolt"></i> BENEFITS</a>
+                <a href="#contact" class="nav-link"><i class="fas fa-terminal"></i> CONTACT</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <h1 class="hero-title">FINCRIME WASTELAND REDEFINED</h1>
+        <p class="hero-subtitle">
+            ComplyStream AI for Financial Crime Operations integrates with <span>Google Cloud</span> to automate the 95% of FinCrime work that happens after alert detection. Built for a post-alert world.
+        </p>
+    </section>
+    
+    <!-- 解决方案区域 -->
+    <section class="solution-section" id="solution">
+        <h2 class="section-title">AI-NATIVE FINCRIME ORCHESTRATION</h2>
+        <div class="solution-grid">
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="card-title">AI-Powered Alert Resolution</h3>
+                <p class="card-desc">Leveraging Google Cloud AI/ML to automatically enrich alerts with customer, payment, and risk data, reducing false positives by over 70%.</p>
+            </div>
+            
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <h3 class="card-title">Agentic Workflows</h3>
+                <p class="card-desc">Intelligent automation of RFIs, document checks, and communication workflows with embedded AI agents powered by Vertex AI.</p>
+            </div>
+            
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="card-title">Secure & Compliant</h3>
+                <p class="card-desc">Built on Google Cloud's security framework with end-to-end encryption, audit trails, and compliance with global financial regulations.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Google Cloud 集成区域 -->
+    <section class="integration-section" id="integration">
+        <div class="google-cloud-logo">
+            <i class="fab fa-google"></i>
+            <span>GOOGLE CLOUD</span>
+        </div>
+        
+        <h2 class="section-title">SEAMLESS INTEGRATION ARCHITECTURE</h2>
+        
+        <div class="integration-points">
+            <div class="integration-point">
+                <h4>Vertex AI & ML Services</h4>
+                <p>Using Google's AI/ML stack for risk scoring, natural language processing, and intelligent alert prioritization.</p>
+            </div>
+            
+            <div class="integration-point">
+                <h4>Google Cloud Security</h4>
+                <p>Leveraging Google's security infrastructure for data protection, identity management, and compliance controls.</p>
+            </div>
+            
+            <div class="integration-point">
+                <h4>Google Workspace Integration</h4>
+                <p>Seamless collaboration for compliance teams with real-time document sharing and communication workflows.</p>
+            </div>
+            
+            <div class="integration-point">
+                <h4>Scalable Infrastructure</h4>
+                <p>Built on Google Cloud's global infrastructure for high availability, scalability, and performance.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 好处/优势区域 -->
+    <section class="solution-section" id="benefits">
+        <h2 class="section-title">THE COMPLYSTREAM ADVANTAGE</h2>
+        <div class="solution-grid">
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <h3 class="card-title">70% Faster Resolution</h3>
+                <p class="card-desc">Reduce alert investigation time from days to hours with automated workflows and AI-powered insights.</p>
+            </div>
+            
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">95% False Positive Reduction</h3>
+                <p class="card-desc">Dramatically cut manual review workload by automatically filtering out false alerts with ML models.</p>
+            </div>
+            
+            <div class="solution-card">
+                <div class="card-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="card-title">Unified Workspace</h3>
+                <p class="card-desc">Bring together fragmented data, communication, and workflows into a single AI-native platform.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 号召行动区域 -->
+    <section class="cta-section">
+        <h2 class="cta-title">READY TO TRANSFORM YOUR FINCRIME OPS?</h2>
+        <p style="color: #aaa; font-size: 1.2rem; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Join leading financial institutions and fintechs using ComplyStream on Google Cloud to automate post-alert workflows.
+        </p>
+        <a href="mailto:kartik@complystream.xyz" class="cta-button">
+            <i class="fas fa-envelope"></i> REQUEST DEMO
+        </a>
+        <a href="https://complystream.xyz" class="cta-button" target="_blank">
+            <i class="fas fa-external-link-alt"></i> VISIT WEBSITE
+        </a>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="wasteland-footer" id="contact">
+        <div class="footer-content">
+            <div>
+                <div class="footer-logo">COMPLYSTREAM</div>
+                <p style="color: #888; max-width: 300px;">
+                    AI-native post-alert FinCrime operations platform.<br>
+                    Built on Google Cloud. Transforming compliance.
+                </p>
+            </div>
+            
+            <div>
+                <h4 style="color: #fff; margin-bottom: 15px; font-family: 'Orbitron', sans-serif;">CONTACT</h4>
+                <div class="footer-links">
+                    <a href="mailto:kartik@complystream.xyz" class="footer-link">
+                        <i class="fas fa-envelope"></i> kartik@complystream.xyz
+                    </a>
+                    <a href="https://complystream.xyz" class="footer-link" target="_blank">
+                        <i class="fas fa-globe"></i> complystream.xyz
+                    </a>
+                    <p class="footer-link">
+                        <i class="fas fa-building"></i> 3 Years in Business
+                    </p>
+                    <p class="footer-link">
+                        <i class="fas fa-users"></i> 20+ Enterprise Clients
+                    </p>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="color: #fff; margin-bottom: 15px; font-family: 'Orbitron', sans-serif;">TARGET MARKETS</h4>
+                <div class="footer-links">
+                    <p class="footer-link">Large Enterprise</p>
+                    <p class="footer-link">Mid Market</p>
+                    <p class="footer-link">Financial Services</p>
+                    <p class="footer-link">Software & Internet</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 ComplyStream AI for Financial Crime Operations. All systems operational. 
+            <span style="color: #3a9c1a;">GOOGLE CLOUD INTEGRATION READY</span>
+        </div>
+    </footer>
+    
+    <script>
+        // 移动端菜单切换
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭菜单（移动端）
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    document.getElementById('navLinks').classList.remove('active');
+                }
+            });
+        });
+        
+        // 添加滚动效果
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.5;
+            
+            // 移动背景层创建视差效果
+            document.querySelector('.static-overlay').style.transform = `translateY(${rate * 0.2}px)`;
+        });
+        
+        // 控制台欢迎信息
+        console.log('%c🔋 COMPLYSTREAM × GOOGLE CLOUD INTEGRATION', 'color: #3a9c1a; font-size: 18px; font-weight: bold;');
+        console.log('%cWelcome to the FinCrime Wasteland. Systems operational.', 'color: #aaa;');
+        console.log('%cContact: kartik@complystream.xyz', 'color: #888;');
+    </script>
+</body>
+</html>
